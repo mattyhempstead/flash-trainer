@@ -1,5 +1,13 @@
 
 class Question:
+
+    OPERATOR_SYMBOLS = {
+        "+": "+",
+        "-": "-",
+        "*": "×",
+        "/": "÷",
+    }
+
     def __init__(self, operator, operand_1, operand_2, answer):
         
         self.operator = operator
@@ -9,9 +17,12 @@ class Question:
 
         self.answer = answer
 
+    @property
+    def operator_symbol(self):
+        return self.OPERATOR_SYMBOLS[self.operator]
 
     def __str__(self, include_answer:bool = False):
-        s = f"{self.operand_1} {self.operator} {self.operand_2}"
+        s = f"{self.operand_1} {self.operator_symbol} {self.operand_2}"
         if include_answer:
             s += f" = {self.answer}"
         return s

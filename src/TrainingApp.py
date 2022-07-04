@@ -48,6 +48,10 @@ class TrainingApp:
         self.session = self.results.last_s_num + 1
 
 
+        # Height and width of tui
+        self.width:int = None
+        self.height:int = None
+
 
 
     def next_question(self):
@@ -145,6 +149,14 @@ class TrainingApp:
         curses.wrapper(self.draw_menu)
 
 
+    @property
+    def center_x(self):
+        return int(((self.width+1) // 2))
+
+    @property
+    def center_y(self):
+        return int(((self.height+1) // 2))
+
     def draw_menu(self, stdscr):
         self.stdscr = stdscr
 
@@ -176,7 +188,7 @@ class TrainingApp:
 
             # Initialization
             self.stdscr.clear()
-            height, width = self.stdscr.getmaxyx()
+            self.height, self.width = self.stdscr.getmaxyx()
 
             self.submit_input(k)
 
@@ -195,21 +207,17 @@ class TrainingApp:
 
             # Render bottom bar
             bottom_str = "Press 'q' to exit"
-            self.draw_text(height-1, 0, bottom_str, 1)
+            self.draw_text(self.height-1, 0, bottom_str, 1)
 
 
             # Rendering question
-            q_str = str(self.question)
-            start_x_q = int((width // 2) - (len(q_str) // 2) - len(q_str) % 2)
-            start_y_q  = int((height // 2) - 2)
-            self.draw_text(start_y_q, start_x_q, q_str, self.q_color)
+            self.draw_text(self.center_y - 1, self.center_x, str(self.question), self.q_color, center=True)
 
-            # Print rest of text
-            i_answer_str = "= " + f"{self.i_answer:4}"
-            start_x_i = int((width // 2) - (len(i_answer_str) // 2) - len(i_answer_str) % 2)
-            self.draw_text(start_y_q + 2, start_x_i, i_answer_str, 1)
+            # Render input
+            self.draw_text(self.center_y + 1, self.center_x - 3, f"= {self.i_answer}", 1)
 
-            stdscr.move(height-1, width-1)
+
+            stdscr.move(self.height-1, self.width-1)
 
             # Refresh the screen
             stdscr.refresh()
@@ -218,12 +226,15 @@ class TrainingApp:
             k = stdscr.getch()
 
 
-    def draw_text(self, y, x, text, color, bold=False):
+    def draw_text(self, y, x, text, color, bold:bool=False, center:bool=False):
         self.stdscr.attron(curses.color_pair(color))
         if bold:
             self.stdscr.attron(curses.A_BOLD)
         else:
             self.stdscr.attroff(curses.A_BOLD)
+
+        if center:
+            x -= len(text)//2 + len(text)%2
 
         self.stdscr.addstr(y, x, text)
         self.stdscr.attroff(curses.A_BOLD)
