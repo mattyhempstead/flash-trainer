@@ -12,8 +12,10 @@ class TimesTablesQuestionFactory(QuestionFactory):
 
 
 if __name__ == '__main__':
-    qf = TimesTablesQuestionFactory()
     results = Results(file_name="results_ttables")
+    # results.df_q_operand_time
+
+    qf = TimesTablesQuestionFactory()
 
     app = TrainingApp(
         question_factory=qf,

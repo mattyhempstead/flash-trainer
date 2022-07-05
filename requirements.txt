@@ -1,0 +1,4 @@
+curses
+pandas
+numpy
+matplotlib

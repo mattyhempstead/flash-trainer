@@ -8,6 +8,8 @@ from Question import Question
 class Results:
     FILE_DIR = "../results"
 
+    Q_COLS = ['s_num', 'q_num', 'q_operator', 'q_operand_1', 'q_operand_2', 'q_answer']
+
     def __init__(self, file_name:str):
         self.file_name = file_name
 
@@ -89,3 +91,41 @@ class Results:
             os.mkdir(self.FILE_DIR)
 
         self.df_results.to_csv(self.file_path, index=False)
+
+
+    @property
+    def df_results_answered(self):
+        df = self.df_results[pd.notnull(self.df_results["i_answer"])]
+        df = df.reset_index(drop=True)
+        return df
+
+    @property
+    def df_results_correct(self):
+        df = self.df_results
+        df = df[df["q_answer"] == df["i_answer"]]
+        df = df.reset_index(drop=True)
+        return df
+
+    @property
+    def df_q(self):
+        df_q_group = self.df_results_correct.groupby(self.Q_COLS)
+
+        df_q = pd.DataFrame(df_q_group["q_ts_start"].min())
+        df_q["q_ts_end"] = pd.DataFrame(df_q_group["q_ts_end"].max())
+        df_q["q_time_total"] = df_q["q_ts_end"] - df_q["q_ts_start"]
+        df_q = df_q.reset_index(drop=False)
+        return df_q
+
+    def df_q_time_groupby(self, group_col:str):
+        return self.df_q.groupby([group_col])["q_time_total"].mean()
+
+    @property
+    def df_q_operand_time(self):
+        """ Dataframe representing the mean time per operand """
+
+        df_q_op_1 = self.df_q_time_groupby("q_operand_1")
+        df_q_op_2 = self.df_q_time_groupby("q_operand_2")
+
+        df_q_op = (df_q_op_1 + df_q_op_2)/2
+        print(df_q_op)
+
